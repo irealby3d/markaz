@@ -14,26 +14,22 @@ jobs:
       - name: 1. Repozitoriyni yuklab olish
         uses: actions/checkout@v4
 
-      - name: 2. Node.js muhitini tayyorlash
+      - name: 2. Node.js muhitini tayyorlash (Node 24)
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          
 
-      - name: 3. Asosiy qaramliklarni o'rnatish
-        run: npm install
-
-      - name: 4. Admin Panelni build qilish
+      - name: 3. Admin Panel qaramliklarini o'rnatish va build qilish
         run: |
           npm install --prefix packages/admin
           npm run build --prefix packages/admin
 
-      - name: 5. TWA modulini build qilish
+      - name: 4. TWA modul qaramliklarini o'rnatish va build qilish
         run: |
           npm install --prefix packages/twa
           npm run build --prefix packages/twa
 
-      - name: 6. Fayllarni serverga Rsync orqali yuborish
+      - name: 5. Fayllarni serverga Rsync orqali yuborish
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
@@ -42,10 +38,9 @@ jobs:
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
           TARGET: "/var/www/aka-central-hub"
-          # node_modules serverga yuborilmaydi, ular Docker ichida o'rnatilishi kerak
           EXCLUDE: "/node_modules/, /.git/, /.github/, /packages/admin/node_modules/, /packages/twa/node_modules/, /packages/backend/node_modules/"
 
-      - name: 7. Docker konteynerlarni serverda qayta ishga tushirish
+      - name: 6. Docker konteynerlarni serverda qayta ishga tushirish
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -54,10 +49,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             cd /var/www/aka-central-hub
-            # Eski konteynerlarni to'xtatish
             docker-compose down
-            # Yangi o'zgarishlar bilan qayta qurish va fonda ishga tushirish
             docker-compose -f docker-compose.yml up -d --build
-            # Ortiqcha eski image'larni tozalash (xotira to'lib qolmasligi uchun)
             docker image prune -f
             
