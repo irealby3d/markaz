@@ -1,0 +1,10 @@
+{
+  "name": "aka-central-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aristokrat Mebel ERP Monorepo",
+  "author": "aka_FinGo",
+  "workspaces": [
+    "packages/*"
+  ]
+}
